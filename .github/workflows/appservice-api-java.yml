@@ -26,6 +26,6 @@ jobs:
       - name: Deploy to App Service (Tomcat)
         uses: azure/webapps-deploy@v3
         with:
-          app-name: "<あなたのAppService名>"    # 例: amitechweb01
+          app-name: "amitechweb01"    # 例: amitechweb01
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
           package: "api-java/target/ROOT.war"
