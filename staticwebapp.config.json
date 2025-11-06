@@ -2,7 +2,7 @@
 "routes": [
 {
 "route": "/api/*",
-"rewrite": "amitechweb01.azurewebsites.net/api/*"
+"rewrite": "https://amitechweb01-afahbmgyczf0egbr.japanwest-01.azurewebsites.net/api/*"
 }
 ],
 "navigationFallback": { "rewrite": "/index.html" }
