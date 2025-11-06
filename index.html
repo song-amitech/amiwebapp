@@ -40,38 +40,60 @@
   </table>
 
   <script>
-    const tbody = document.getElementById('tbody');
-    const q = document.getElementById('q');
-    const btn = document.getElementById('btn');
+  const tbody = document.getElementById('tbody');
+  const q = document.getElementById('q');
+  const btn = document.getElementById('btn');
 
-    async function search(keyword = '') {
-      tbody.innerHTML = `<tr><td colspan="4">読み込み中…</td></tr>`;
-      try {
-        const url = keyword ? `/api/employees?query=${encodeURIComponent(keyword)}` : `/api/employees`;
-        const res = await fetch(url);
-        const data = await res.json();
+  async function search(keyword = '') {
+    tbody.innerHTML = `<tr><td colspan="4">読み込み中…</td></tr>`;
+    try {
+      const url = keyword
+        ? `/api/employees?query=${encodeURIComponent(keyword)}`
+        : `/api/employees`;
 
-        if (!Array.isArray(data) || !data.length) {
-          tbody.innerHTML = `<tr><td colspan="4">データがありません</td></tr>`;
-          return;
-        }
+      const res = await fetch(url);
 
-        tbody.innerHTML = data.map(r => `
-          <tr>
-            <td>${r.employee_no ?? '-'}</td>
-            <td>${r.full_name ?? '-'}</td>
-            <td>${r.department ?? '-'}</td>
-            <td>${r.email ?? '-'}</td>
-          </tr>
-        `).join('');
-      } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="4">エラー：API に接続できませんでした</td></tr>`;
-        console.error(e);
+      // HTTPエラーを可視化
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        tbody.innerHTML =
+          `<tr><td colspan="4">HTTP ${res.status} ${res.statusText}<br>${text.substring(0,300)}</td></tr>`;
+        console.error('API error:', res.status, res.statusText, text);
+        return;
       }
-    }
 
-    btn.addEventListener('click', () => search(q.value.trim()));
-    window.addEventListener('DOMContentLoaded', () => search(''));
-  </script>
+      // JSONとして解釈
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        const text = await res.text().catch(() => '');
+        tbody.innerHTML = `<tr><td colspan="4">JSON解析に失敗：${text.substring(0,300)}</td></tr>`;
+        console.error('JSON parse error:', e, text);
+        return;
+      }
+
+      if (!Array.isArray(data) || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4">データがありません</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map(r => `
+        <tr>
+          <td>${r.employee_no ?? '-'}</td>
+          <td>${r.full_name ?? '-'}</td>
+          <td>${r.department ?? '-'}</td>
+          <td>${r.email ?? '-'}</td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="4">ネットワーク例外：${e?.message || e}</td></tr>`;
+      console.error(e);
+    }
+  }
+
+  btn.addEventListener('click', () => search(q.value.trim()));
+  window.addEventListener('DOMContentLoaded', () => search(''));
+</script>
 </body>
 </html>
