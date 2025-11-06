@@ -1,0 +1,31 @@
+name: Deploy Java API (Tomcat)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "api-java/**"
+      - ".github/workflows/appservice-api-java.yml"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Build with Maven
+        working-directory: api-java
+        run: mvn -B -DskipTests package
+
+      - name: Deploy to App Service (Tomcat)
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: "<あなたのAppService名>"    # 例: amitechweb01
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+          package: "api-java/target/ROOT.war"
