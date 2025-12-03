@@ -1,5 +1,4 @@
 com\amitech\api\Employee.class
 com\amitech\api\EmployeeController.class
-com\amitech\api\EmployeeRepository.class
 com\amitech\api\ServletInitializer.class
 com\amitech\api\ApiApplication.class
