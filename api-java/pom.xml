@@ -46,12 +46,10 @@
         </dependency>
 
         <!-- DB（PostgreSQL は後で追加でもOK）-->
-        <!--
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
-        -->
     </dependencies>
 
     <build>
@@ -67,3 +65,4 @@
     </build>
 
 </project>
+
