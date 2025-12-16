@@ -23,6 +23,9 @@ jobs:
         working-directory: api-java
         run: mvn -B -DskipTests package
 
+      - name: Check WAR content (PostgreSQL Driver)
+        run: jar tf api-java/target/ROOT.war | grep -i postgresql
+
       - name: Deploy to App Service (Tomcat)
         uses: azure/webapps-deploy@v3
         with:
