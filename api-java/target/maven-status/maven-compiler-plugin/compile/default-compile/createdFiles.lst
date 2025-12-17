@@ -1,3 +1,4 @@
+com\example\employeeapi\controller\RootController.class
 com\example\employeeapi\api\EmployeeController.class
 com\example\employeeapi\EmployeeApiApplication.class
 com\example\employeeapi\api\EmployeeDto.class
