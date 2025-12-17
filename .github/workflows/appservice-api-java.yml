@@ -26,6 +26,6 @@ jobs:
       - name: Deploy to App Service (Java SE)
         uses: azure/webapps-deploy@v3
         with:
-          app-name: "amitechweb01"
+          app-name: "amitechAPS01"
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
           package: "api-java/target/*.jar"
