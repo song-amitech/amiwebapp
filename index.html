@@ -7,19 +7,31 @@
   <style>
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans JP", sans-serif; max-width: 760px; margin: 40px auto; padding: 0 16px; }
     h1 { font-size: 22px; margin: 0 0 16px; }
-    .row { display: flex; gap: 8px; }
-    input { flex: 1; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    input { flex: 1; min-width: 220px; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; }
     button { padding: 10px 14px; border: 1px solid #ccc; background: #fafafa; border-radius: 8px; cursor: pointer; }
-    table { width:100%; border-collapse: collapse; margin-top: 16px; }
-    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #eee; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    .meta { margin-top: 10px; color: #666; font-size: 13px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+    table { width:100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #eee; vertical-align: top; }
     tfoot td { color: #666; font-size: 13px; }
+    .error { white-space: pre-wrap; word-break: break-word; color: #b00020; }
+    .muted { color:#666; }
+    .right { margin-left:auto; }
   </style>
 </head>
 <body>
   <h1>AMITECH 社員検索</h1>
+
   <div class="row">
-    <input id="q" placeholder="社員番号・氏名・部署で検索" />
+    <input id="q" placeholder="社員番号・氏名・部署で検索" autocomplete="off" />
     <button id="btn">検索</button>
+    <button id="clear" type="button">クリア</button>
+  </div>
+
+  <div class="meta">
+    <div id="status" class="muted">待機中</div>
+    <div id="count" class="muted"></div>
   </div>
 
   <table>
@@ -32,7 +44,7 @@
       </tr>
     </thead>
     <tbody id="tbody">
-      <tr><td colspan="4">読み込み中…</td></tr>
+      <tr><td colspan="4" class="muted">読み込み中…</td></tr>
     </tbody>
     <tfoot>
       <tr><td colspan="4">※ データは App Service の API から取得します</td></tr>
@@ -40,60 +52,131 @@
   </table>
 
   <script>
-  const tbody = document.getElementById('tbody');
-  const q = document.getElementById('q');
-  const btn = document.getElementById('btn');
+    const tbody = document.getElementById('tbody');
+    const q = document.getElementById('q');
+    const btn = document.getElementById('btn');
+    const clearBtn = document.getElementById('clear');
+    const statusEl = document.getElementById('status');
+    const countEl = document.getElementById('count');
 
-  async function search(keyword = '') {
-    tbody.innerHTML = `<tr><td colspan="4">読み込み中…</td></tr>`;
-    try {
-      const url = keyword
-        ? `/api/employees?query=${encodeURIComponent(keyword)}`
-        : `/api/employees`;
+    let lastController = null;
 
-      const res = await fetch(url);
-
-      // HTTPエラーを可視化
-      if (!res.ok) {
-        const text = await res.text().catch(() => '');
-        tbody.innerHTML =
-          `<tr><td colspan="4">HTTP ${res.status} ${res.statusText}<br>${text.substring(0,300)}</td></tr>`;
-        console.error('API error:', res.status, res.statusText, text);
-        return;
-      }
-
-      // JSONとして解釈
-      let data;
-      try {
-        data = await res.json();
-      } catch (e) {
-        const text = await res.text().catch(() => '');
-        tbody.innerHTML = `<tr><td colspan="4">JSON解析に失敗：${text.substring(0,300)}</td></tr>`;
-        console.error('JSON parse error:', e, text);
-        return;
-      }
-
-      if (!Array.isArray(data) || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4">データがありません</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = data.map(r => `
-        <tr>
-          <td>${r.employee_no ?? '-'}</td>
-          <td>${r.full_name ?? '-'}</td>
-          <td>${r.department ?? '-'}</td>
-          <td>${r.email ?? '-'}</td>
-        </tr>
-      `).join('');
-    } catch (e) {
-      tbody.innerHTML = `<tr><td colspan="4">ネットワーク例外：${e?.message || e}</td></tr>`;
-      console.error(e);
+    function setLoading(isLoading) {
+      btn.disabled = isLoading;
+      clearBtn.disabled = isLoading;
+      q.disabled = isLoading;
+      statusEl.textContent = isLoading ? '検索中…' : '待機中';
     }
-  }
 
-  btn.addEventListener('click', () => search(q.value.trim()));
-  window.addEventListener('DOMContentLoaded', () => search(''));
-</script>
+    function showMessage(msg, isError = false) {
+      tbody.innerHTML = '';
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 4;
+      td.className = isError ? 'error' : 'muted';
+      td.textContent = msg;
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    }
+
+    function renderRows(data) {
+      tbody.innerHTML = '';
+      for (const r of data) {
+        const tr = document.createElement('tr');
+
+        const tdNo = document.createElement('td');
+        tdNo.textContent = r.employee_no ?? '-';
+
+        const tdName = document.createElement('td');
+        tdName.textContent = r.full_name ?? '-';
+
+        const tdDept = document.createElement('td');
+        tdDept.textContent = r.department ?? '-';
+
+        const tdMail = document.createElement('td');
+        tdMail.textContent = r.email ?? '-';
+
+        tr.append(tdNo, tdName, tdDept, tdMail);
+        tbody.appendChild(tr);
+      }
+    }
+
+    async function search(keyword = '') {
+      // 連打・Enter連発対策：前の通信をキャンセル
+      if (lastController) lastController.abort();
+      lastController = new AbortController();
+
+      setLoading(true);
+      countEl.textContent = '';
+      showMessage('読み込み中…');
+
+      try {
+        const url = keyword
+          ? `/api/employees?query=${encodeURIComponent(keyword)}`
+          : `/api/employees`;
+
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          cache: 'no-store',
+          signal: lastController.signal
+        });
+
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          showMessage(`HTTP ${res.status} ${res.statusText}\n${text.substring(0, 600)}`, true);
+          return;
+        }
+
+        // JSONだけ読む（失敗時に備えて例外捕捉）
+        let data;
+        try {
+          data = await res.json();
+        } catch (e) {
+          const text = await res.text().catch(() => '');
+          showMessage(`JSON解析に失敗しました。\n${text.substring(0, 600)}`, true);
+          return;
+        }
+
+        if (!Array.isArray(data) || data.length === 0) {
+          showMessage('データがありません');
+          countEl.textContent = '0件';
+          return;
+        }
+
+        renderRows(data);
+        countEl.textContent = `${data.length}件`;
+        statusEl.textContent = keyword ? `「${keyword}」で検索` : '全件表示';
+      } catch (e) {
+        if (e?.name === 'AbortError') return; // キャンセルは無視
+        showMessage(`ネットワーク例外：${e?.message || e}`, true);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function runSearch() {
+      search(q.value.trim());
+    }
+
+    btn.addEventListener('click', runSearch);
+
+    // Enterで検索（IME変換中は無視）
+    q.addEventListener('keydown', (e) => {
+      if (e.isComposing) return;
+      if (e.key === 'Enter') runSearch();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      q.value = '';
+      q.focus();
+      search('');
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      q.focus();
+      search('');
+    });
+  </script>
 </body>
 </html>
