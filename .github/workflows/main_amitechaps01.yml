@@ -1,3 +1,5 @@
+# Docs: https://github.com/Azure/webapps-deploy
+
 name: Build and deploy JAR app to Azure Web App - amitechAPS01
 
 on:
@@ -18,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Java version
+      - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           java-version: "21"
@@ -26,9 +28,9 @@ jobs:
 
       - name: Build with Maven (api-java)
         working-directory: api-java
-        run: mvn -B -DskipTests clean package
+        run: mvn -B clean package
 
-      - name: Upload artifact for deployment job
+      - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
         with:
           name: java-app
@@ -42,7 +44,7 @@ jobs:
       contents: read
 
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: java-app
@@ -52,5 +54,4 @@ jobs:
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_930CBAE9FD7F4FB09286F922C7E82004 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_8A84DD8FD0614FA1B47BFDB03489CC20 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIP_
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_8A84DD8FD0
