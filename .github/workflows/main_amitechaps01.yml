@@ -9,6 +9,11 @@ on:
       - ".github/workflows/main_amitechaps01.yml"
   workflow_dispatch:
 
+# ★ これを追加（全体のデフォルト権限）
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,18 +34,25 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app
-          path: api-java/target/*jar
+          path: api-java/target/*.jar
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
+
+    # ★ これも追加（ジョブ権限）
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
       - name: Download JAR
         uses: actions/download-artifact@v4
         with:
           name: app
+          path: .
 
-      - name: Login to Azure
+      - name: Login to Azure (OIDC)
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_930CBAE9FD7F4FB09286F922C7E82004 }}
@@ -51,4 +63,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: amitechAPS01
-          package: '*.jar'
+          package: "*.jar"
