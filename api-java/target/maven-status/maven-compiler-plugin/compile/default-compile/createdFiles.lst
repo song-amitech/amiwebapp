@@ -1,4 +1,6 @@
-com\amitech\api\Employee.class
-com\amitech\api\EmployeeController.class
-com\amitech\api\ServletInitializer.class
-com\amitech\api\ApiApplication.class
+com\example\employeeapi\api\EmployeeController.class
+com\example\employeeapi\EmployeeApiApplication.class
+com\example\employeeapi\api\EmployeeDto.class
+com\example\employeeapi\domain\Employee.class
+com\example\employeeapi\repo\EmployeeRepository.class
+com\example\employeeapi\config\CorsConfig.class

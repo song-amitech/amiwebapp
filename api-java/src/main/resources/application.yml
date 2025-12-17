@@ -1,0 +1,18 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://amitechpsqlsvr01.postgres.database.azure.com:5432/webappdb?sslmode=require
+    username: amitechdbadmin
+    password: Psqlp@swadmin2025
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
