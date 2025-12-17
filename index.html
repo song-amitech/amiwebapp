@@ -185,7 +185,8 @@ q.addEventListener("keydown", e => { if (e.key === "Enter") search(q.value.trim(
 /* 初回ロード */
 window.addEventListener("DOMContentLoaded", () => {
   q.focus();
-  search("");
+  // search(""); を削除し、代わりにメッセージを表示する
+  showMessage("検索キーワードを入力してください");
 });
 </script>
 
