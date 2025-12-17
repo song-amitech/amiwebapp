@@ -137,7 +137,7 @@ async function search(keyword = "") {
   showMessage("読み込み中…");
 
   const url = keyword
-    ? `${API_BASE}/api/employees?query=${encodeURIComponent(keyword)}`
+    ? `${API_BASE}/api/employees?keyword=${encodeURIComponent(keyword)}`
     : `${API_BASE}/api/employees`;
 
   try {
