@@ -1,4 +1,4 @@
-name: Deploy Java API (Tomcat)
+name: Deploy Java API (JAR / Java SE)
 
 on:
   push:
@@ -21,14 +21,11 @@ jobs:
 
       - name: Build with Maven
         working-directory: api-java
-        run: mvn -B -DskipTests package
+        run: mvn -B -DskipTests clean package
 
-      - name: Check WAR content (PostgreSQL Driver)
-        run: jar tf api-java/target/ROOT.war | grep -i postgresql
-
-      - name: Deploy to App Service (Tomcat)
+      - name: Deploy to App Service (Java SE)
         uses: azure/webapps-deploy@v3
         with:
-          app-name: "amitechweb01"    # 例: amitechweb01
+          app-name: "amitechweb01"
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
-          package: "api-java/target/ROOT.war"
+          package: "api-java/target/*.jar"
