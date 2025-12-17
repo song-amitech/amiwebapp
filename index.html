@@ -17,7 +17,6 @@
     tfoot td { color: #666; font-size: 13px; }
     .error { white-space: pre-wrap; word-break: break-word; color: #b00020; }
     .muted { color:#666; }
-    .right { margin-left:auto; }
   </style>
 </head>
 <body>
@@ -25,7 +24,7 @@
 
   <div class="row">
     <input id="q" placeholder="社員番号・氏名・部署で検索" autocomplete="off" />
-    <button id="btn">検索</button>
+    <button id="btn" type="button">検索</button>
     <button id="clear" type="button">クリア</button>
   </div>
 
@@ -84,8 +83,9 @@
       for (const r of data) {
         const tr = document.createElement('tr');
 
+        // ★ APIのキー名に合わせる（employeeNo / name / department / email）
         const tdNo = document.createElement('td');
-        tdNo.textContent = r.employee_no ?? '-';
+        tdNo.textContent = r.employeeNo ?? '-';
 
         const tdName = document.createElement('td');
         tdName.textContent = r.name ?? '-';
@@ -102,7 +102,6 @@
     }
 
     async function search(keyword = '') {
-      // 連打・Enter連発対策：前の通信をキャンセル
       if (lastController) lastController.abort();
       lastController = new AbortController();
 
@@ -122,18 +121,18 @@
           signal: lastController.signal
         });
 
+        // ★ body二重読み防止：先に text として1回だけ読む
+        const text = await res.text();
+
         if (!res.ok) {
-          const text = await res.text().catch(() => '');
           showMessage(`HTTP ${res.status} ${res.statusText}\n${text.substring(0, 600)}`, true);
           return;
         }
 
-        // JSONだけ読む（失敗時に備えて例外捕捉）
         let data;
         try {
-          data = await res.json();
+          data = JSON.parse(text);
         } catch (e) {
-          const text = await res.text().catch(() => '');
           showMessage(`JSON解析に失敗しました。\n${text.substring(0, 600)}`, true);
           return;
         }
@@ -141,6 +140,7 @@
         if (!Array.isArray(data) || data.length === 0) {
           showMessage('データがありません');
           countEl.textContent = '0件';
+          statusEl.textContent = keyword ? `「${keyword}」で検索` : '全件表示';
           return;
         }
 
@@ -148,7 +148,7 @@
         countEl.textContent = `${data.length}件`;
         statusEl.textContent = keyword ? `「${keyword}」で検索` : '全件表示';
       } catch (e) {
-        if (e?.name === 'AbortError') return; // キャンセルは無視
+        if (e?.name === 'AbortError') return;
         showMessage(`ネットワーク例外：${e?.message || e}`, true);
       } finally {
         setLoading(false);
@@ -161,7 +161,6 @@
 
     btn.addEventListener('click', runSearch);
 
-    // Enterで検索（IME変換中は無視）
     q.addEventListener('keydown', (e) => {
       if (e.isComposing) return;
       if (e.key === 'Enter') runSearch();
