@@ -7,6 +7,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "api-java/**"
+      - ".github/workflows/main_amitechaps03.yml"
   workflow_dispatch:
 
 jobs:
