@@ -32,8 +32,9 @@ jobs:
           # ===== Static Web Apps 設定 =====
           app_location: "/"          # index.html がある場所
           api_location: ""           # API は使わない
-          output_location: ""        # ビルド成果物なし
+          output_location: "."       
           skip_app_build: true       # ★超重要：Oryx を動かさない
+          github_id_token: ${{ steps.idtoken.outputs.result }}          
           # ===============================
 
   close_pull_request_job:
