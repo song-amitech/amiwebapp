@@ -4,4 +4,5 @@ com\example\employeeapi\EmployeeApiApplication.class
 com\example\employeeapi\api\EmployeeDto.class
 com\example\employeeapi\domain\Employee.class
 com\example\employeeapi\repo\EmployeeRepository.class
+com\example\employeeapi\config\SecurityConfig.class
 com\example\employeeapi\config\CorsConfig.class

@@ -1,6 +1,7 @@
 D:\amiwebapp\api-java\src\main\java\com\example\employeeapi\api\EmployeeController.java
 D:\amiwebapp\api-java\src\main\java\com\example\employeeapi\api\EmployeeDto.java
 D:\amiwebapp\api-java\src\main\java\com\example\employeeapi\config\CorsConfig.java
+D:\amiwebapp\api-java\src\main\java\com\example\employeeapi\config\SecurityConfig.java
 D:\amiwebapp\api-java\src\main\java\com\example\employeeapi\controller\RootController.java
 D:\amiwebapp\api-java\src\main\java\com\example\employeeapi\domain\Employee.java
 D:\amiwebapp\api-java\src\main\java\com\example\employeeapi\EmployeeApiApplication.java
