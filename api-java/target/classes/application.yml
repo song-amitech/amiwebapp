@@ -1,6 +1,6 @@
 server:
   # Azure App Service のリバースプロキシ対応（最重要）
-  forward-headers-strategy: framework
+  forward-headers-strategy: native
 
   tomcat:
     use-relative-redirects: true
