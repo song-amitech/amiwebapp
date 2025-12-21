@@ -44,13 +44,14 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
-	
+<!-- 削除 or コメントアウト -->
+<!--
 	<dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
 	</dependency>
   </dependencies>
-
+-->
   <build>
     <plugins>
       <plugin>
