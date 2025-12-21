@@ -2,7 +2,7 @@
   "routes": [
     {
       "route": "/api/*",
-      "rewrite": "https://amitechaps06-c8c5bzcchyd9e8cc.japanwest-01.azurewebsites.net/api/*"
+      "rewrite": "https://amitechaps06-c8c5bzcchyd9e8cc.japanwest-01.azurewebsites.net/*"
     }
   ],
   "navigationFallback": {
