@@ -179,7 +179,7 @@ async function search(keyword = "") {
 
 /* ===== イベント ===== */
 btn.addEventListener("click", () => search(q.value.trim()));
-clearBtn.addEventListener("click", () => { q.value = ""; q.focus(); search(""); });
+clearBtn.addEventListener("click", () => { q.value = ""; q.focus(); });
 q.addEventListener("keydown", e => { if (e.key === "Enter") search(q.value.trim()); });
 
 /* 初回ロード */
