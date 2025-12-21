@@ -1,4 +1,4 @@
-name: Build and deploy JAR app to Azure Web App - amitechAPS03
+name: Build and deploy JAR app to Azure Web App - amitechAPS06
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - "api-java/**"
-      - ".github/workflows/main_amitechaps03.yml"
+      - ".github/workflows/main_amitechaps06.yml"
   workflow_dispatch:
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '17'
           distribution: 'microsoft'
 
       - name: Build with Maven
@@ -55,6 +55,6 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: amitechAPS03
+          app-name: amitechAPS06
           slot-name: Production
           package: '*.jar'
