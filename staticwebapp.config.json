@@ -2,7 +2,7 @@
   "routes": [
     {
       "route": "/api/*",
-      "rewrite": "amitechaps06-c8c5bzcchyd9e8cc.japanwest-01.azurewebsites.net/api/{*path}"
+      "rewrite": "amitechaps06-c8c5bzcchyd9e8cc.japanwest-01.azurewebsites.net/{*path}"
     }
   ]
 }
